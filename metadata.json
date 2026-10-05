@@ -1,0 +1,6 @@
+{
+  "name": "CviTube",
+  "description": "Private, feature-rich video and audio client with mood shelves, offline downloads, SponsorBlock, and personal notes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
