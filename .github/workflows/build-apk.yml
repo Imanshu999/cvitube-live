@@ -1,0 +1,60 @@
+name: CviTube Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build CviTube APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Make Gradle executable
+        run: |
+          if [ -f "./gradlew" ]; then
+            chmod +x ./gradlew
+          else
+            echo "ERROR: gradlew is missing from the repository."
+            exit 1
+          fi
+
+      - name: Verify Gradle project
+        run: |
+          test -f settings.gradle || test -f settings.gradle.kts
+          test -f build.gradle || test -f build.gradle.kts
+          echo "Gradle project detected."
+
+      - name: Clean project
+        run: ./gradlew clean --no-daemon
+
+      - name: Build CviTube Debug APK
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Find APK
+        run: |
+          echo "Generated APK files:"
+          find . -type f -name "*.apk" -print
+
+      - name: Upload CviTube APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: CviTube-debug-apk
+          path: "**/build/outputs/apk/**/*.apk"
+          if-no-files-found: error
