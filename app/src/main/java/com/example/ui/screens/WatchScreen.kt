@@ -58,7 +58,7 @@ fun WatchScreen(
             uploader = details.uploader ?: ""
             val candidates = buildList {
                 details.hls?.takeIf { it.isNotBlank() }?.let(::add)
-                details.videoStreams.filter { !it.videoOnly && it.url.isNotBlank() }.forEach { add(it.url) }
+                details.videoStreams.filter { it.videoOnly != true && it.url.isNotBlank() }.forEach { add(it.url) }
                 details.videoStreams.filter { it.url.isNotBlank() }.forEach { add(it.url) }
                 details.audioStreams.filter { it.url.isNotBlank() }.forEach { add(it.url) }
             }.distinct()
