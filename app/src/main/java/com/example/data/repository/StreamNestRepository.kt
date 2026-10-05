@@ -327,15 +327,11 @@ class StreamNestRepository(private val context: Context) {
                 if (!isActive) {
                     downloadDao.updateDownload(entity.copy(status = "PAUSED"))
                 } else {
-                    // Fallback create verified asset
-                    if (!destFile.exists() || destFile.length() == 0L) {
-                        destFile.writeBytes(ByteArray(1024 * 512))
-                    }
                     downloadDao.updateDownload(
                         entity.copy(
-                            fileSizeBytes = destFile.length(),
-                            downloadedBytes = destFile.length(),
-                            status = "COMPLETED"
+                            fileSizeBytes = if (destFile.exists()) destFile.length() else 0L,
+                            downloadedBytes = if (destFile.exists()) destFile.length() else 0L,
+                            status = "FAILED"
                         )
                     )
                 }
@@ -350,7 +346,7 @@ class StreamNestRepository(private val context: Context) {
             details.audioStreams.firstOrNull { it.url.isNotBlank() }?.url
         } else {
             details.videoStreams
-                .firstOrNull { !it.videoOnly && it.url.isNotBlank() }?.url
+                .firstOrNull { it.videoOnly != true && it.url.isNotBlank() }?.url
                 ?: details.videoStreams.firstOrNull { it.url.isNotBlank() }?.url
         }
     }
