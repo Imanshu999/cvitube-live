@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -49,6 +51,7 @@ fun WatchScreen(
     var title by remember(videoId) { mutableStateOf("Loading video…") }
     var uploader by remember(videoId) { mutableStateOf("") }
     var error by remember(videoId) { mutableStateOf<String?>(null) }
+    var description by remember(videoId) { mutableStateOf("") }
 
     LaunchedEffect(videoId) {
         error = null
@@ -56,6 +59,7 @@ fun WatchScreen(
             val details = repository.getStreamDetails(videoId)
             title = details.title ?: "CviTube"
             uploader = details.uploader ?: ""
+            description = details.description.orEmpty()
             val candidates = buildList {
                 details.hls?.takeIf { it.isNotBlank() }?.let(::add)
                 details.videoStreams.filter { it.videoOnly != true && it.url.isNotBlank() }.forEach { add(it.url) }
@@ -110,6 +114,14 @@ fun WatchScreen(
             )
             if (error != null) {
                 Text(error!!, color = Color.White, modifier = Modifier.padding(24.dp))
+            }
+        }
+
+        Column(
+            modifier = Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(16.dp)
+        ) {
+            if (description.isNotBlank()) {
+                Text(description, color = Color.LightGray, style = MaterialTheme.typography.bodyMedium)
             }
         }
 
