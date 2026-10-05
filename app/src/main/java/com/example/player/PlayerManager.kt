@@ -125,9 +125,21 @@ class PlayerManager(private val context: Context) {
         }
 
         override fun onPlayerError(error: PlaybackException) {
-            Log.e("PlayerManager", "Live stream playback error: ${error.message}", error)
-            emitMessage("This live stream could not be played. Please try again or choose another video.")
-            pendingFallbacks.clear()
+            Log.e("PlayerManager", "Playback error: " + error.message, error)
+            val nextUrl = pendingFallbacks.firstOrNull()
+            if (!nextUrl.isNullOrBlank()) {
+                pendingFallbacks.removeAt(0)
+                currentActiveUrl = nextUrl
+                try {
+                    exoPlayer.setMediaItem(MediaItem.fromUri(nextUrl))
+                    exoPlayer.prepare()
+                    exoPlayer.play()
+                } catch (e: Exception) {
+                    Log.e("PlayerManager", "Fallback playback failed", e)
+                }
+            } else {
+                emitMessage("This video stream could not be played. Try refreshing or another video.")
+            }
         }
     }
 
